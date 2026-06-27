@@ -1,6 +1,6 @@
 package net.octocore;
 
-import net.octocore.networking.packet.PacketBuffer;
+import net.octocore.datatype.DataBuffer;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -20,7 +20,7 @@ public class TestClient
                 )
                 {
                         System.out.println("Connected to the server");
-                        var buffer = new PacketBuffer();
+                        var buffer = new DataBuffer();
                         buffer.writeVarInt(4).writeVarInt(0).writeInt(404);
                         out.write(buffer.getArray());
                 }

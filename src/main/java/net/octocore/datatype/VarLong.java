@@ -23,8 +23,9 @@ public class VarLong
         }
         
         
-        public static long read (ByteBuffer buffer)
+        public static long read (final ByteBuffer buffer, int bytesLimit)
         {
+                bytesLimit = Math.clamp(bytesLimit, 1, 10);
                 long value = 0;
                 int i = 0;
                 byte b;
@@ -34,13 +35,19 @@ public class VarLong
                         b = buffer.get();
                         value |= (b & 127L) << i++ * 7;
                 }
-                while (i <= 10 && VarLong.hasNextByte(b));
+                while (i <= bytesLimit && VarLong.hasNextByte(b));
                 
                 return value;
         }
         
         
-        public static void write (ByteBuffer buffer, long value)
+        public static long read (final ByteBuffer buffer)
+        {
+                return VarLong.read(buffer, 10);
+        }
+        
+        
+        public static void write (final ByteBuffer buffer, long value)
         {
                 while ((value & -128L) != 0L)
                 {

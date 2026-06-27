@@ -1,41 +1,38 @@
-package net.octocore.networking.packet;
-
-import net.octocore.datatype.VarInt;
-import net.octocore.datatype.VarLong;
+package net.octocore.datatype;
 
 import java.nio.ByteBuffer;
 
 
-public class PacketBuffer
+public class DataBuffer
 {
         protected ByteBuffer buffer;
         
         
-        public PacketBuffer (ByteBuffer buffer)
+        public DataBuffer (ByteBuffer buffer)
         {
                 this.buffer = buffer;
         }
         
         
-        public PacketBuffer (byte[] buffer)
+        public DataBuffer (byte[] buffer)
         {
                 this(ByteBuffer.wrap(buffer));
         }
         
         
-        public PacketBuffer (byte[] buffer, int offset, int length)
+        public DataBuffer (byte[] buffer, int offset, int length)
         {
                 this(ByteBuffer.wrap(buffer, offset, length));
         }
         
         
-        public PacketBuffer (int capacity)
+        public DataBuffer (int capacity)
         {
                 this(ByteBuffer.allocate(capacity));
         }
         
         
-        public PacketBuffer ()
+        public DataBuffer ()
         {
                 this(1);
         }
@@ -59,28 +56,35 @@ public class PacketBuffer
         }
         
         
-        public PacketBuffer point (int index)
+        public DataBuffer point (int index)
         {
                 this.buffer.position(index);
                 return this;
         }
         
         
-        public final PacketBuffer move (int offset)
+        public final DataBuffer move (int offset)
         {
                 this.point(this.getPointer() + offset);
                 return this;
         }
         
         
-        public PacketBuffer rewind ()
+        public DataBuffer limit (int index)
+        {
+                this.buffer.limit(index);
+                return this;
+        }
+        
+        
+        public DataBuffer rewind ()
         {
                 this.buffer.rewind();
                 return this;
         }
         
         
-        public PacketBuffer flip ()
+        public DataBuffer flip ()
         {
                 this.buffer.flip();
                 return this;
@@ -93,7 +97,7 @@ public class PacketBuffer
         }
         
         
-        public PacketBuffer checkBufferBoundaries (int offset)
+        public DataBuffer checkBufferBoundaries (int offset)
         {
                 int size = this.buffer.capacity(), neededSpace = this.buffer.position() + offset - size + 1;
                 if (neededSpace <= 0) return this;
@@ -103,7 +107,7 @@ public class PacketBuffer
         }
         
         
-        public PacketBuffer write (byte[] buffer)
+        public DataBuffer write (byte[] buffer)
         {
                 this.checkBufferBoundaries(buffer.length);
                 this.buffer.put(buffer);
@@ -117,7 +121,7 @@ public class PacketBuffer
         }
         
         
-        public PacketBuffer writeByte (byte value)
+        public DataBuffer writeByte (byte value)
         {
                 this.checkBufferBoundaries(1);
                 this.buffer.put(value);
@@ -125,13 +129,13 @@ public class PacketBuffer
         }
         
         
-        public int readShort ()
+        public short readShort ()
         {
                 return this.buffer.getShort();
         }
         
         
-        public PacketBuffer writeShort (short value)
+        public DataBuffer writeShort (short value)
         {
                 this.checkBufferBoundaries(2);
                 this.buffer.putShort(value);
@@ -145,11 +149,17 @@ public class PacketBuffer
         }
         
         
-        public PacketBuffer writeInt (int value)
+        public DataBuffer writeInt (int value)
         {
                 this.checkBufferBoundaries(4);
                 this.buffer.putInt(value);
                 return this;
+        }
+        
+        
+        public int readVarInt (final int bytesLimit)
+        {
+                return VarInt.read(this.buffer, bytesLimit);
         }
         
         
@@ -159,7 +169,7 @@ public class PacketBuffer
         }
         
         
-        public PacketBuffer writeVarInt (int value)
+        public DataBuffer writeVarInt (int value)
         {
                 this.checkBufferBoundaries(VarInt.getByteSize(value));
                 VarInt.write(buffer, value);
@@ -173,11 +183,17 @@ public class PacketBuffer
         }
         
         
-        public PacketBuffer writeLong (long value)
+        public DataBuffer writeLong (long value)
         {
                 this.checkBufferBoundaries(8);
                 this.buffer.putLong(value);
                 return this;
+        }
+        
+        
+        public long readVarLong (final int bytesLimit)
+        {
+                return VarLong.read(this.buffer, bytesLimit);
         }
         
         
@@ -187,7 +203,7 @@ public class PacketBuffer
         }
         
         
-        public PacketBuffer writeVarLong (long value)
+        public DataBuffer writeVarLong (long value)
         {
                 this.checkBufferBoundaries(VarLong.getByteSize(value));
                 VarLong.write(buffer, value);

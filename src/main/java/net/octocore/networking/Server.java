@@ -1,7 +1,7 @@
 package net.octocore.networking;
 
 import net.octocore.datatype.VarInt;
-import net.octocore.networking.packet.PacketBuffer;
+import net.octocore.datatype.DataBuffer;
 import net.octocore.networking.packet.PacketType;
 
 import java.io.IOException;
@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.Arrays;
 
 
 public class Server
@@ -80,7 +79,7 @@ public class Server
                         }
                         if (size < 1) continue;
                         
-                        var buf = new PacketBuffer();
+                        var buf = new DataBuffer();
                         var arr = new byte[1];
                         
                         while (in.read(arr) != -1 && buf.getSize() <= size)
@@ -94,7 +93,7 @@ public class Server
         protected int loadVarInt (InputStream in)
                 throws IOException
         {
-                var buf = new PacketBuffer();
+                var buf = new DataBuffer();
                 var arr = new byte[1];
                 var i = 0;
                 

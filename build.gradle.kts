@@ -14,7 +14,8 @@ repositories {
 
 
 dependencies {
-
+        implementation("tools.jackson.core:jackson-core:3.2.0")
+        implementation("tools.jackson.core:jackson-databind:3.2.0")
 }
 
 

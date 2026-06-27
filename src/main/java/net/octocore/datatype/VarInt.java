@@ -23,8 +23,9 @@ public class VarInt
         }
         
         
-        public static int read (ByteBuffer buffer)
+        public static int read (final ByteBuffer buffer, int bytesLimit)
         {
+                bytesLimit = Math.clamp(bytesLimit, 1, 5);
                 int value = 0, i = 0;
                 byte b;
                 
@@ -33,13 +34,19 @@ public class VarInt
                         b = buffer.get();
                         value |= (b & 127) << i++ * 7;
                 }
-                while (i <= 5 && VarInt.hasNextByte(b));
+                while (i <= bytesLimit && VarInt.hasNextByte(b));
                 
                 return value;
         }
         
         
-        public static void write (ByteBuffer buffer, int value)
+        public static int read (final ByteBuffer buffer)
+        {
+                return VarInt.read(buffer, 5);
+        }
+        
+        
+        public static void write (final ByteBuffer buffer, int value)
         {
                 while ((value & -128) != 0)
                 {

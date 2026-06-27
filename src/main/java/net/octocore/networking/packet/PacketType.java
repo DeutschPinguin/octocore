@@ -1,19 +1,20 @@
 package net.octocore.networking.packet;
 
-import java.nio.ByteBuffer;
+import net.octocore.datatype.DataBuffer;
+
 import java.util.Arrays;
 import java.util.function.Function;
 
 
-public class PacketType<T extends Packet>
+public class PacketType<T extends PacketData>
 {
         private static PacketType<?>[] TYPES = new PacketType[10];
         private static int REGISTERED_COUNT = 0;
         
-        protected final Function<PacketBuffer, T> creator;
+        protected final Function<DataBuffer, T> creator;
         
         
-        public PacketType (Function<PacketBuffer, T> creator)
+        public PacketType (Function<DataBuffer, T> creator)
         {
                 this.creator = creator;
         }
@@ -26,7 +27,7 @@ public class PacketType<T extends Packet>
         }
         
         
-        public static <T extends Packet> int register (PacketType<T> type)
+        public static <T extends PacketData> int register (PacketType<T> type)
         {
                 if (type == null) return -1;
                 
@@ -41,13 +42,13 @@ public class PacketType<T extends Packet>
         }
         
         
-        public Function<PacketBuffer, T> getCreator ()
+        public Function<DataBuffer, T> getCreator ()
         {
                 return this.creator;
         }
         
         
-        public final T create (PacketBuffer buffer)
+        public final T create (DataBuffer buffer)
         {
                 return this.getCreator().apply(buffer);
         }
