@@ -1,6 +1,6 @@
 plugins {
-        id("java")
-        id("application")
+    id("java")
+    id("application")
 }
 
 
@@ -9,7 +9,7 @@ version = "1.0-SNAPSHOT"
 
 
 repositories {
-        mavenCentral()
+    mavenCentral()
 }
 
 
@@ -19,6 +19,5 @@ dependencies {
 
 
 application {
-        mainClass.set(System.getProperty("exec.mainClass") ?: "net.octocore.Main")
+    mainClass.set(System.getProperty("exec.mainClass") ?: "net.octocore.Main")
 }
-
