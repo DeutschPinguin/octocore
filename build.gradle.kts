@@ -19,6 +19,6 @@ dependencies {
 
 
 application {
-        mainClass.set("net.octocore.Main")
+        mainClass.set(System.getProperty("exec.mainClass") ?: "net.octocore.Main")
 }
 
