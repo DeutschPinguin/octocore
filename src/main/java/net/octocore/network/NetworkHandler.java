@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -12,25 +13,23 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 
-public final class Server
+public final class NetworkHandler
         implements Runnable, AutoCloseable
 {
-        private static final Logger LOGGER = LogManager.getLogger();
+        private static final Logger LOGGER = LogManager.getLogger("NetworkHandler");
         private final ServerSocketChannel serverChannel;
         private final Selector selector;
-        private final ByteBuffer buffer = ByteBuffer.allocate(1024);
         
         
-        private Server (final ServerSocketChannel serverChannel, final Selector serverSelector)
+        private NetworkHandler (final ServerSocketChannel serverChannel, final Selector serverSelector)
         {
                 this.serverChannel = serverChannel;
                 this.selector = serverSelector;
         }
         
         
-        public static Server open (final int port)
+        public static NetworkHandler open (final int port)
         {
-                LOGGER.info("Server's starting");
                 try
                 {
                         var serverChannel = ServerSocketChannel.open();
@@ -38,8 +37,9 @@ public final class Server
                         serverChannel.configureBlocking(false);
                         var selector = Selector.open();
                         serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-                        LOGGER.info("Server started on a port {}", port);
-                        return new Server(serverChannel, selector);
+                        serverChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
+                        LOGGER.info("Server's listening on port {}", port);
+                        return new NetworkHandler(serverChannel, selector);
                 }
                 catch (Exception e)
                 {
@@ -49,27 +49,52 @@ public final class Server
         }
         
         
+        private void acceptNewClient (final SelectionKey key, final ServerSocketChannel channel)
+                throws IOException
+        {
+                var clientChannel = channel.accept();
+                if (clientChannel == null) return;
+                clientChannel.configureBlocking(false);
+                clientChannel.register(this.selector, SelectionKey.OP_READ, new ClientView());
+        }
+        
+        
+        private void transferClientData (final SelectionKey key, final SocketChannel channel)
+                throws IOException
+        {
+                var client = (ClientView) key.attachment();
+                var buffer = ByteBuffer.allocate(1024);
+                
+                int len = channel.read(buffer);
+                
+                if (len == -1)
+                {
+                        key.cancel();
+                        channel.close();
+                }
+                else if (len < 1) return;
+                
+                buffer.flip();
+                client.receiveDataFromClient(buffer);
+                
+                buffer.clear();
+                client.sendDataToClient(buffer);
+                
+                buffer.flip();
+                while (buffer.hasRemaining()) channel.write(buffer);
+        }
+        
+        
         private void handleConnection (final SelectionKey key)
                 throws Exception
         {
-                if (key.isAcceptable() && key.channel() instanceof ServerSocketChannel newChannel)
+                if (key.isAcceptable() && key.channel() instanceof ServerSocketChannel channel)
                 {
-                        var client = newChannel.accept();
-                        client.configureBlocking(false);
-                        client.register(this.selector, SelectionKey.OP_READ);
-                        key.attach(new ClientConnectionContext());
+                        this.acceptNewClient(key, channel);
                 }
-                
-                if (key.isReadable() && key.channel() instanceof SocketChannel clientChannel)
+                else if (key.isReadable() && key.channel() instanceof SocketChannel channel)
                 {
-                        var client = (ClientConnectionContext) key.attachment();
-                        var length = clientChannel.read(this.buffer);
-                        if (length == -1) clientChannel.close();
-                        else if (length < 1) return;
-                        client.read(this.buffer.flip());
-                        client.write(this.buffer.clear());
-                        this.buffer.flip();
-                        while (this.buffer.hasRemaining()) clientChannel.write(buffer);
+                        this.transferClientData(key, channel);
                 }
         }
         
@@ -84,9 +109,9 @@ public final class Server
                 {
                         var key = iter.next();
                         iter.remove();
+                        if (!key.isValid()) continue;
                         try
                         {
-                                this.buffer.clear();
                                 this.handleConnection(key);
                         }
                         catch (Exception e)
@@ -121,6 +146,7 @@ public final class Server
                 throws IOException
         {
                 LOGGER.info("Closing server socket connections");
+                this.selector.wakeup();
                 this.serverChannel.close();
                 this.selector.close();
         }

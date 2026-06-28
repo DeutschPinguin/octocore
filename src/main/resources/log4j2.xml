@@ -7,7 +7,7 @@
 
         <Appenders>
                 <Console name="CONSOLE">
-                        <PatternLayout disableAnsi="false" pattern="%highlight{[%d{HH:mm:ss.SSS}] %t/%-5p: %m}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=white}%n"/>
+                        <PatternLayout disableAnsi="false" pattern="%style{[%d{HH:mm:ss.SSS}]}{cyan} %highlight{(%t/%p)}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=gray} %style{(%c)}{blue} %m%n"/>
                 </Console>
 
                 <RollingFile name="FILE"
@@ -19,14 +19,14 @@
                                 <TimeBasedTriggeringPolicy/>
                         </Policies>
                         <ThresholdFilter level="INFO"/>
-                        <DefaultRolloverStategy max="8"/>
-                        <PatternLayout pattern="[%d{HH:mm:ss.SSS}] %t/%-5p: %m%n"/>
+                        <DefaultRolloverStrategy max="8"/>
+                        <PatternLayout pattern="[%d{HH:mm:ss.SSS}] (%t/%p) (%c) %m%n"/>
                 </RollingFile>
 
         </Appenders>
 
         <Loggers>
-                <Root level="${env:LOG_LEVEL:-DEBUG}">
+                <Root level="${env:LOG_LEVEL:-INFO}">
                         <AppenderRef ref="CONSOLE"/>
                         <AppenderRef ref="FILE"/>
                 </Root>

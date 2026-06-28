@@ -1,6 +1,7 @@
 package net.octocore;
 
-import net.octocore.network.OldServer;
+import net.octocore.network.NetworkHandler;
+import org.apache.logging.log4j.LogManager;
 
 
 public class Main
@@ -8,14 +9,13 @@ public class Main
         
         static void main ()
         {
-                try
+                try (var server = NetworkHandler.open(25565))
                 {
-                        var server = OldServer.open(25565);
                         server.run();
                 }
                 catch (Exception e)
                 {
-                        throw new RuntimeException(e);
+                        LogManager.getLogger().fatal(e.getMessage(), e);
                 }
         }
         
