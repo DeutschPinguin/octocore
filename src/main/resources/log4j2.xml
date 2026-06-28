@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns="https://logging.apache.org/xml/ns"
+               xsi:schemaLocation="
+                       https://logging.apache.org/xml/ns
+                       https://logging.apache.org/xml/ns/log4j-config-2.xsd">
+
+        <Appenders>
+                <Console name="CONSOLE">
+                        <PatternLayout disableAnsi="false" pattern="%highlight{[%d{HH:mm:ss.SSS}] %t/%-5p: %m}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=white}%n"/>
+                </Console>
+
+                <RollingFile name="FILE"
+                             fileName="./logs/latest.log"
+                             filePattern="./logs/archived/%d{yyyy-MM-dd}_%i.log.gz"
+                             append="true">
+                        <Policies>
+                                <SizeBasedTriggeringPolicy size="16MB"/>
+                                <TimeBasedTriggeringPolicy/>
+                        </Policies>
+                        <ThresholdFilter level="INFO"/>
+                        <DefaultRolloverStategy max="8"/>
+                        <PatternLayout pattern="[%d{HH:mm:ss.SSS}] %t/%-5p: %m%n"/>
+                </RollingFile>
+
+        </Appenders>
+
+        <Loggers>
+                <Root level="${env:LOG_LEVEL:-DEBUG}">
+                        <AppenderRef ref="CONSOLE"/>
+                        <AppenderRef ref="FILE"/>
+                </Root>
+        </Loggers>
+
+</Configuration>

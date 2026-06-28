@@ -1,5 +1,8 @@
 package net.octocore.network;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -12,6 +15,7 @@ import java.nio.channels.SocketChannel;
 public final class Server
         implements Runnable, AutoCloseable
 {
+        private static final Logger LOGGER = LogManager.getLogger();
         private final ServerSocketChannel serverChannel;
         private final Selector selector;
         private final ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -26,6 +30,7 @@ public final class Server
         
         public static Server open (final int port)
         {
+                LOGGER.info("Server's starting");
                 try
                 {
                         var serverChannel = ServerSocketChannel.open();
@@ -33,12 +38,13 @@ public final class Server
                         serverChannel.configureBlocking(false);
                         var selector = Selector.open();
                         serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+                        LOGGER.info("Server started on a port {}", port);
                         return new Server(serverChannel, selector);
                 }
-                catch (IOException e)
+                catch (Exception e)
                 {
-                        e.printStackTrace();
-                        return null;
+                        LOGGER.fatal("Failed to open server socket connection: ", e);
+                        throw new RuntimeException(e);
                 }
         }
         
@@ -83,9 +89,10 @@ public final class Server
                                 this.buffer.clear();
                                 this.handleConnection(key);
                         }
-                        catch (Throwable e)
+                        catch (Exception e)
                         {
-                                e.printStackTrace();
+                                LOGGER.error("Dropping client connection due to the error: ", e);
+                                key.channel().close();
                         }
                 }
         }
@@ -103,6 +110,7 @@ public final class Server
                 }
                 catch (Exception e)
                 {
+                        LOGGER.fatal("Critical error encoutered in a server network logic: ", e);
                         throw new RuntimeException(e);
                 }
         }
@@ -112,6 +120,7 @@ public final class Server
         public void close ()
                 throws IOException
         {
+                LOGGER.info("Closing server socket connections");
                 this.serverChannel.close();
                 this.selector.close();
         }

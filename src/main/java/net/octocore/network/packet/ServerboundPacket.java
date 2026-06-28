@@ -1,9 +1,9 @@
 package net.octocore.network.packet;
 
-import java.nio.ByteBuffer;
+import net.octocore.network.datatype.DataBuffer;
 
 public abstract class ServerboundPacket {
-	public ByteBuffer buffer;
+	public DataBuffer buffer;
 
 	public void read() {
 	}

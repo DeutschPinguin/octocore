@@ -13,7 +13,7 @@ public class DataBuffer
                 this.buffer = buffer;
         }
         
-
+        
         public DataBuffer (byte[] buffer)
         {
                 this(ByteBuffer.wrap(buffer));
@@ -97,6 +97,117 @@ public class DataBuffer
         }
         
         
+        public DataBuffer checkBufferBoundaries (int offset)
+        {
+                int size = this.buffer.capacity(), neededSpace = this.buffer.position() + offset - size + 1;
+                if (neededSpace <= 0) return this;
+                var newBuffer = ByteBuffer.allocate(size + neededSpace).put(this.buffer.flip());
+                this.buffer = newBuffer;
+                return this;
+        }
         
-
+        
+        public DataBuffer write (byte[] buffer)
+        {
+                this.checkBufferBoundaries(buffer.length);
+                this.buffer.put(buffer);
+                return this;
+        }
+        
+        
+        public int readByte ()
+        {
+                return this.buffer.get();
+        }
+        
+        
+        public DataBuffer writeByte (byte value)
+        {
+                this.checkBufferBoundaries(1);
+                this.buffer.put(value);
+                return this;
+        }
+        
+        
+        public short readShort ()
+        {
+                return this.buffer.getShort();
+        }
+        
+        
+        public DataBuffer writeShort (short value)
+        {
+                this.checkBufferBoundaries(2);
+                this.buffer.putShort(value);
+                return this;
+        }
+        
+        
+        public int readInt ()
+        {
+                return this.buffer.getInt();
+        }
+        
+        
+        public DataBuffer writeInt (int value)
+        {
+                this.checkBufferBoundaries(4);
+                this.buffer.putInt(value);
+                return this;
+        }
+        
+        
+        public int readVarInt (final int bytesLimit)
+        {
+                return VarInt.read(this.buffer, bytesLimit);
+        }
+        
+        
+        public int readVarInt ()
+        {
+                return VarInt.read(this.buffer);
+        }
+        
+        
+        public DataBuffer writeVarInt (int value)
+        {
+                this.checkBufferBoundaries(VarInt.getByteSize(value));
+                VarInt.write(buffer, value);
+                return this;
+        }
+        
+        
+        public long readLong ()
+        {
+                return this.buffer.getLong();
+        }
+        
+        
+        public DataBuffer writeLong (long value)
+        {
+                this.checkBufferBoundaries(8);
+                this.buffer.putLong(value);
+                return this;
+        }
+        
+        
+        public long readVarLong (final int bytesLimit)
+        {
+                return VarLong.read(this.buffer, bytesLimit);
+        }
+        
+        
+        public long readVarLong ()
+        {
+                return VarLong.read(this.buffer);
+        }
+        
+        
+        public DataBuffer writeVarLong (long value)
+        {
+                this.checkBufferBoundaries(VarLong.getByteSize(value));
+                VarLong.write(buffer, value);
+                return this;
+        }
+        
 }

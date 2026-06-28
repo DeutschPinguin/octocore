@@ -1,10 +1,9 @@
 package net.octocore.network.packet.handshake.serverbound;
 
-import net.octocore.network.datatype.ReaderBuffer;
 import net.octocore.network.packet.ServerboundPacket;
 
 import java.nio.BufferUnderflowException;
-import java.nio.ByteBuffer;
+
 
 public class ServerHandshakePacket extends ServerboundPacket {
 	@Override
