@@ -1,4 +1,4 @@
-package net.octocore.network;
+package net.octocore.network.packet.pingpong.data;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.JsonNodeFactory;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 
-public class ServerStatus
+public class PingStatus
 {
         protected final List<Sample> samples = new ArrayList<>();
         protected String versionName, favicon;
@@ -40,9 +40,9 @@ public class ServerStatus
         }
         
         
-        public static ServerStatus deserialize (final ObjectNode node)
+        public static PingStatus deserialize (final ObjectNode node)
         {
-                var status = new ServerStatus();
+                var status = new PingStatus();
                 
                 if (!node.has("version")) return status;
                 
@@ -79,7 +79,7 @@ public class ServerStatus
         }
         
         
-        public final ServerStatus addSamples (Sample... samples)
+        public final PingStatus addSamples (Sample... samples)
         {
                 for (var sample : samples) this.samples().add(sample);
                 return this;
@@ -92,7 +92,7 @@ public class ServerStatus
         }
         
         
-        public ServerStatus setVersionName (final String versionName)
+        public PingStatus setVersionName (final String versionName)
         {
                 this.versionName = versionName;
                 return this;
@@ -105,7 +105,7 @@ public class ServerStatus
         }
         
         
-        public ServerStatus setFavicon (final String favicon)
+        public PingStatus setFavicon (final String favicon)
         {
                 this.favicon = favicon;
                 return this;
@@ -118,7 +118,7 @@ public class ServerStatus
         }
         
         
-        public ServerStatus setVersionProtocol (final int versionProtocol)
+        public PingStatus setVersionProtocol (final int versionProtocol)
         {
                 this.versionProtocol = versionProtocol;
                 return this;
@@ -131,7 +131,7 @@ public class ServerStatus
         }
         
         
-        public ServerStatus setPlayersOnline (final int playersOnline)
+        public PingStatus setPlayersOnline (final int playersOnline)
         {
                 this.playersOnline = playersOnline;
                 return this;
@@ -144,7 +144,7 @@ public class ServerStatus
         }
         
         
-        public ServerStatus setPlayersLimit (final int playersLimit)
+        public PingStatus setPlayersLimit (final int playersLimit)
         {
                 this.playersLimit = playersLimit;
                 return this;
@@ -157,7 +157,7 @@ public class ServerStatus
         }
         
         
-        public ServerStatus setDescription (final ObjectNode description)
+        public PingStatus setDescription (final ObjectNode description)
         {
                 this.description = description;
                 return this;
@@ -170,7 +170,7 @@ public class ServerStatus
         }
         
         
-        public ServerStatus setEnforcesSecureChat (final boolean enforceSecureChat)
+        public PingStatus setEnforcesSecureChat (final boolean enforceSecureChat)
         {
                 this.enforcesSecureChat = enforceSecureChat;
                 return this;

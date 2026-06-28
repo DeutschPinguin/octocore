@@ -1,10 +1,10 @@
-package net.octocore.network.packet.status.serverbound;
+package net.octocore.network.packet.pingpong;
 
 import net.octocore.network.datatype.DataBuffer;
 import net.octocore.network.packet.PacketData;
 
 
-public record StatusRequest()
+public record ServerboundStatusRequest()
         implements PacketData
 {
         
@@ -12,9 +12,9 @@ public record StatusRequest()
         public void write (DataBuffer buffer) {}
         
         
-        public static StatusRequest create (DataBuffer buffer)
+        public static ServerboundStatusRequest create (DataBuffer buffer)
         {
-                return new StatusRequest();
+                return new ServerboundStatusRequest();
         }
         
 }

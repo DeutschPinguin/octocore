@@ -16,11 +16,16 @@ public final class ClientView
          */
         public void receiveDataFromClient (final ByteBuffer buffer)
         {
-        
+                /*
+                        TODO packets parsing
+                        TODO this.buffer overflow handling
+                        TODO remove all packet parsing and world updating from network thread
+                        TODO split client's update work (read VS write) into different threads
+                */
         }
         
         /**
-         * @param buffer Empty buffer which will be sent to real client
+         * @param buffer Empty buffer which will be sent to real client after filling in this method
          */
         public void sendDataToClient (final ByteBuffer buffer)
         {

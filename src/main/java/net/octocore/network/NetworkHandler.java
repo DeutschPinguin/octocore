@@ -63,19 +63,23 @@ public final class NetworkHandler
                 throws IOException
         {
                 var client = (ClientView) key.attachment();
-                var buffer = ByteBuffer.allocate(1024);
+                var buffer = ByteBuffer.allocate(256);
                 
-                int len = channel.read(buffer);
-                
-                if (len == -1)
+                while (true)
                 {
-                        key.cancel();
-                        channel.close();
+                        int len = channel.read(buffer);
+                        
+                        if (len == -1)
+                        {
+                                key.cancel();
+                                channel.close();
+                                return;
+                        }
+                        else if (len < 1) break;
+                        
+                        buffer.flip();
+                        client.receiveDataFromClient(buffer);
                 }
-                else if (len < 1) return;
-                
-                buffer.flip();
-                client.receiveDataFromClient(buffer);
                 
                 buffer.clear();
                 client.sendDataToClient(buffer);

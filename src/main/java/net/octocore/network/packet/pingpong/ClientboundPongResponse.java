@@ -1,28 +1,27 @@
-package net.octocore.network.packet.status.clientbound;
+package net.octocore.network.packet.pingpong;
 
-import net.octocore.network.ServerStatus;
 import net.octocore.network.datatype.DataBuffer;
 import net.octocore.network.packet.PacketData;
 
 import java.nio.BufferUnderflowException;
 
 
-public record StatusResponse(ServerStatus status)
+public record ClientboundPongResponse(long timestamp)
         implements PacketData
 {
         
         @Override
         public void write (DataBuffer buffer)
         {
-        
+                buffer.writeLong(this.timestamp);
         }
         
         
-        public static StatusResponse create (DataBuffer buffer)
+        public static ClientboundPongResponse create (DataBuffer buffer)
         {
                 try
                 {
-                        return new StatusResponse(null);
+                        return new ClientboundPongResponse(buffer.readLong());
                 }
                 catch (BufferUnderflowException e)
                 {
