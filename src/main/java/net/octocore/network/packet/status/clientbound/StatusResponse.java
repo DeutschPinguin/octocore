@@ -1,8 +1,8 @@
-package net.octocore.networking.packet.clientbound;
+package net.octocore.network.packet.status.clientbound;
 
-import net.octocore.datatype.DataBuffer;
-import net.octocore.networking.ServerStatus;
-import net.octocore.networking.packet.PacketData;
+import net.octocore.network.ServerStatus;
+import net.octocore.network.datatype.DataBuffer;
+import net.octocore.network.packet.PacketData;
 
 import java.nio.BufferUnderflowException;
 
@@ -12,13 +12,13 @@ public record StatusResponse(ServerStatus status)
 {
         
         @Override
-        public void write (DataBuffer buf)
+        public void write (DataBuffer buffer)
         {
         
         }
         
         
-        public static StatusResponse create (DataBuffer buf)
+        public static StatusResponse create (DataBuffer buffer)
         {
                 try
                 {

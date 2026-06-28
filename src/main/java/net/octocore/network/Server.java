@@ -1,8 +1,8 @@
-package net.octocore.networking;
+package net.octocore.network;
 
-import net.octocore.datatype.VarInt;
-import net.octocore.datatype.DataBuffer;
-import net.octocore.networking.packet.PacketType;
+import net.octocore.network.datatype.DataBuffer;
+import net.octocore.network.datatype.VarInt;
+import net.octocore.network.packet.PacketType;
 
 import java.io.IOException;
 import java.io.InputStream;

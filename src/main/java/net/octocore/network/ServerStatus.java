@@ -1,4 +1,4 @@
-package net.octocore.networking;
+package net.octocore.network;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.JsonNodeFactory;

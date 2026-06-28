@@ -1,6 +1,6 @@
 package net.octocore;
 
-import net.octocore.networking.Server;
+import net.octocore.network.Server;
 
 
 public class Main

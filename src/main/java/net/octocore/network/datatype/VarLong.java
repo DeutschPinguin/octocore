@@ -1,4 +1,4 @@
-package net.octocore.datatype;
+package net.octocore.network.datatype;
 
 import java.nio.ByteBuffer;
 

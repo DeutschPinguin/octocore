@@ -1,9 +1,9 @@
-package net.octocore.networking.packet;
-
-import net.octocore.datatype.DataBuffer;
+package net.octocore.network.packet;
 
 import java.util.Arrays;
 import java.util.function.Function;
+
+import net.octocore.network.datatype.DataBuffer;
 
 
 public class PacketType<T extends PacketData>
