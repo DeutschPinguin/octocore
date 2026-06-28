@@ -1,6 +1,6 @@
 package net.octocore;
 
-import net.octocore.network.Server;
+import net.octocore.network.OldServer;
 
 
 public class Main
@@ -10,7 +10,7 @@ public class Main
         {
                 try
                 {
-                        var server = Server.open(25565);
+                        var server = OldServer.open(25565);
                         server.run();
                 }
                 catch (Exception e)

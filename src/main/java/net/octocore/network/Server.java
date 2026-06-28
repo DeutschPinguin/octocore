@@ -1,55 +1,89 @@
 package net.octocore.network;
 
-import net.octocore.network.datatype.DataBuffer;
-import net.octocore.network.datatype.VarInt;
-import net.octocore.network.packet.PacketType;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 
 
-public class Server
+public final class Server
+        implements Runnable, AutoCloseable
 {
-        public static final int MAX_CLIENT_TIME_OUT = 2200; // in millis
+        private final ServerSocketChannel serverChannel;
+        private final Selector selector;
+        private final ByteBuffer buffer = ByteBuffer.allocate(1024);
         
-        protected final ServerSocket socket;
         
-        
-        protected Server (ServerSocket socket)
+        private Server (final ServerSocketChannel serverChannel, final Selector serverSelector)
         {
-                this.socket = socket;
+                this.serverChannel = serverChannel;
+                this.selector = serverSelector;
         }
         
         
-        public static Server open (int port)
+        public static Server open (final int port)
+        {
+                try
+                {
+                        var serverChannel = ServerSocketChannel.open();
+                        serverChannel.bind(new InetSocketAddress(port));
+                        serverChannel.configureBlocking(false);
+                        var selector = Selector.open();
+                        serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+                        return new Server(serverChannel, selector);
+                }
+                catch (IOException e)
+                {
+                        e.printStackTrace();
+                        return null;
+                }
+        }
+        
+        
+        private void handleConnection (final SelectionKey key)
+                throws Exception
+        {
+                if (key.isAcceptable() && key.channel() instanceof ServerSocketChannel newChannel)
+                {
+                        var client = newChannel.accept();
+                        client.configureBlocking(false);
+                        client.register(this.selector, SelectionKey.OP_READ);
+                        key.attach(new ClientConnectionContext());
+                }
+                
+                if (key.isReadable() && key.channel() instanceof SocketChannel clientChannel)
+                {
+                        var client = (ClientConnectionContext) key.attachment();
+                        var length = clientChannel.read(this.buffer);
+                        if (length == -1) clientChannel.close();
+                        else if (length < 1) return;
+                        client.read(this.buffer.flip());
+                        client.write(this.buffer.clear());
+                        this.buffer.flip();
+                        while (this.buffer.hasRemaining()) clientChannel.write(buffer);
+                }
+        }
+        
+        
+        public void update ()
                 throws IOException
         {
-                return new Server(new ServerSocket(port));
-        }
-        
-        
-        public void run ()
-        {
-                System.out.println("Server started");
+                if (this.selector.select() < 1) return;
+                var iter = this.selector.selectedKeys().iterator();
                 
-                while (true) {
-                        try (
-                                var client = this.socket.accept();
-                                var in = client.getInputStream();
-                                var out = client.getOutputStream()
-                        )
+                while (iter.hasNext())
+                {
+                        var key = iter.next();
+                        iter.remove();
+                        try
                         {
-                                this.handleSingleConnection(client, in, out);
+                                this.buffer.clear();
+                                this.handleConnection(key);
                         }
-                        catch (SocketTimeoutException e)
-                        {
-                                System.out.println("Timed out");
-                        }
-                        catch (IOException e)
+                        catch (Throwable e)
                         {
                                 e.printStackTrace();
                         }
@@ -57,55 +91,29 @@ public class Server
         }
         
         
-        protected void handleSingleConnection (Socket client, InputStream in, OutputStream out)
-                throws IOException
+        @Override
+        public void run ()
         {
-                client.setSoTimeout(MAX_CLIENT_TIME_OUT);
-                
-                while (true)
+                try
                 {
-                        int size = this.loadVarInt(in), id = this.loadVarInt(in);
-                        var type = PacketType.get(id);
-                        
-                        if (type == null)
+                        while (this.serverChannel.isOpen())
                         {
-                                System.out.println("Received packet with unknown identifier");
-                                return;
+                                this.update();
                         }
-                        if (type.getSizeLimit() < size)
-                        {
-                                System.out.println("Received packet that exceeds its size limits");
-                                return;
-                        }
-                        if (size < 1) continue;
-                        
-                        var buf = new DataBuffer();
-                        var arr = new byte[1];
-                        
-                        while (in.read(arr) != -1 && buf.getSize() <= size)
-                                buf.writeByte(arr[0]);
-                
-                        type.create(buf.flip());
+                }
+                catch (Exception e)
+                {
+                        throw new RuntimeException(e);
                 }
         }
         
         
-        protected int loadVarInt (InputStream in)
+        @Override
+        public void close ()
                 throws IOException
         {
-                var buf = new DataBuffer();
-                var arr = new byte[1];
-                var i = 0;
-                
-                while (in.read(arr) != -1)
-                {
-                        var value = arr[0];
-                        buf.writeByte(value);
-                        if (++i >= 5 || !VarInt.hasNextByte(value)) return buf.flip().readVarInt();
-                }
-                
-                in.close();
-                return -1;
+                this.serverChannel.close();
+                this.selector.close();
         }
         
 }
