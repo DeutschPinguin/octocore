@@ -9,6 +9,10 @@ import java.nio.ByteBuffer;
 public final class ClientView
 {
         private static final Logger LOGGER = LogManager.getLogger("ClientView");
+        private ByteBuffer
+                packetBuffer = ByteBuffer.allocate(256),
+                workBuffer = ByteBuffer.allocate(256);
+        private int packetSize = -1;
         
         
         /**
@@ -22,7 +26,28 @@ public final class ClientView
                         TODO remove all packet parsing and world updating from network thread
                         TODO split client's update work (read VS write) into different threads
                 */
+                
+//                this.packetBuffer.put(buffer);
+//
+//                if (this.packetSize == -1)
+//                {
+//                        while (this.packetBuffer.hasRemaining())
+//                        {
+//                               byte b = this.packetBuffer.get();
+//                               this.workBuffer.put(b);
+//                               int pos = this.workBuffer.position();
+//                               if (pos >= 4 || !VarInt.hasNextByte(b))
+//                               {
+//                                       this.packetSize = VarInt.read(this.workBuffer) + pos;
+//                                       this.workBuffer.clear();
+//                                       break;
+//                               }
+//                        }
+//                }
+//
+//                if (this.packetBuffer.limit() < this.packetSize) return;
         }
+        
         
         /**
          * @param buffer Empty buffer which will be sent to real client after filling in this method
